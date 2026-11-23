@@ -1,0 +1,24 @@
+# Development files kept locally, never committed.
+/AGENTS.md
+/PLAN.md
+/TODO.md
+/ISSUES.md
+/docs/DEVELOPMENT.md
+/docs/dev/
+# The machines' ROMs, and the tapes, disks and manuals kept for one's own use: never committed.
+/roms/
+/extras/
+# Scratch and test output, worktrees; build trees; the distribution.
+/work/
+/build/
+/dist/
+# A configuration, screenshots and states written by running ZetRo in the repository root.
+/zetro.yaml
+/zetro-*.png
+/states/
+*.zrs
+# Editors and Python.
+.vscode/
+.venv/
+__pycache__/
+*.py[cod]

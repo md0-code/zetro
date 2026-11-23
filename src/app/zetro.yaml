@@ -1,0 +1,55 @@
+# ZetRo: the machine that runs and the settings of its window.
+# zetro --list-models names the models; docs/NOTES.md lists every key.
+
+machine:
+  model: test                 # the computer: a model's name (zetro --list-models); test is the test screen
+  options:                    # the options of that model, by name
+    beep: on                  # the test screen beeps on a key
+
+media:                        # what is in the model's slots
+  tape:
+    image: ""                 # a tape file; empty for none
+    write_protect: false
+    fast: true                # not original: the tape loads and saves fast, at full speed
+    sound: true               # the tape's signal is heard
+    autoload: true            # not original: a tape put into the machine is loaded at once
+
+video:
+  look: crt                   # crt or plain
+  aspect: original            # original (4:3) or square (square pixels)
+  scale: fit                  # fit the window, or integer (whole multiples)
+  filter: sharp               # nearest, linear or sharp
+  border: full                # full, medium (16 lines), minimal (5 lines) or none
+  fullscreen: false
+  vsync: true
+
+sound:
+  enabled: true
+  volume: 100                 # 0 to 100
+
+controllers:                  # the machine's joysticks; F11 switches the keyboard joystick on and off
+  joystick1:
+    device: keyboard          # none, keyboard, or controller 1 to 8 (a game controller)
+  joystick2:
+    device: none
+  keys:                       # the keyboard joystick's keys, by SDL key name
+    up: Up
+    down: Down
+    left: Left
+    right: Right
+    fire: Left Alt
+    fire2: Left Ctrl
+  keyboard_joystick: false    # true: the keys are the joystick from the start
+
+# The host end of the machine's byte ports (serial lines, printers), by the key of the port: serial, printer, user.
+# Each is none (the default), loopback (a serial port's output wired back to its input), a host serial port (COM3 or
+# serial:COM3), pipe:NAME, tcp:HOST:PORT (connects), tcp-listen:[HOST:]PORT (waits for one client) or file:FILE (what
+# the guest sends is appended to the file; a relative name is beside this file). A printer takes any but loopback.
+# The Ports page of the setup screen sets them too; keys of other models than the running one are kept and ignored.
+# ports:
+  # serial: none
+  # printer: file:printer.out
+
+ui:
+  language: en                # en or ro
+  state_slot: 1               # the slot F2 saves to and F3 loads from (1 to 10; states/ beside this file)

@@ -1,0 +1,2 @@
+/* The program's icon: the first icon of zetro.exe, which Windows shows for the file and SDL gives the window. */
+1 ICON "../../assets/zetro.ico"

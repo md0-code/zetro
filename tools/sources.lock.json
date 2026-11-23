@@ -1,0 +1,152 @@
+{
+  "roms/amic.rom": {
+    "bytes": 16384,
+    "sha256": "7fe40b1a70def2afc6f8c7c5eb5d1668a6dbe6d377d25b8e0676ebeb978fbef4",
+    "source": "MiSTerRO/src/core-amic/assets/roms/boot.rom",
+    "derived": "built by the aMIC core's tools from the archive https://www.z80-romania.ro/aMIC-95 (docs/amic/provenance.md)"
+  },
+  "roms/cip01.rom": {
+    "bytes": 2048,
+    "sha256": "4b75de3a67253cd06a428b9cdce6e586ed59c0ce1fd4526275b89e9866982fff",
+    "source": "MiSTerRO/src/core-cip/assets/roms/cip01.rom",
+    "derived": "built by the cip core's own tools, from the archives of its docs/cip/sources.lock.json"
+  },
+  "roms/cip03.rom": {
+    "bytes": 16384,
+    "sha256": "1a05ac4f7bd67521c7f2b51b617d2fe086e28e297ec7749049d544c3ec3e1bb6",
+    "source": "MiSTerRO/src/core-cip/assets/roms/cip03.rom",
+    "derived": "built by the cip core's own tools, from the archives of its docs/cip/sources.lock.json"
+  },
+  "roms/cip04.rom": {
+    "bytes": 65536,
+    "sha256": "e8e822cdd205ed3cee95f8be51071cd7566c814019ffdfde5d268bf8f4037910",
+    "source": "MiSTerRO/src/core-cip/assets/roms/cip04.rom",
+    "derived": "built by the cip core's own tools, from the archives of its docs/cip/sources.lock.json"
+  },
+  "roms/cobra.rom": {
+    "bytes": 81920,
+    "sha256": "befb9116772456bbbabe9b44258f3fe5ecf3b33049be9612073707716c7f456a",
+    "source": "MiSTerRO/src/core-cobra/assets/roms/boot.rom",
+    "derived": "built by the CoBra core's tools from the archive https://www.z80-romania.ro/CoBra-64 and the CoBra Project, https://cobrasov.com/CoBra%20Project/ (docs/cobra/provenance.md)"
+  },
+  "roms/cubz-v13.rom": {
+    "bytes": 8192,
+    "sha256": "716065d441e02b5ee8fdd214d300fd557c742d829a2a749c02cf4ba34d1806b0",
+    "source": "MiSTerRO/src/core-cubz/assets/roms/cubz-v13.rom",
+    "derived": "built by the cubz core's own tools, from the archives of its docs/cubz/sources.lock.json"
+  },
+  "roms/cubz-v14.rom": {
+    "bytes": 8192,
+    "sha256": "a49e7e2435987011b54405333851116678996fb865c66da2fe28e5dc9a34d4f3",
+    "source": "MiSTerRO/src/core-cubz/assets/roms/cubz-v14.rom",
+    "derived": "built by the cubz core's own tools, from the archives of its docs/cubz/sources.lock.json"
+  },
+  "roms/esxide.bin": {
+    "bytes": 8192,
+    "sha256": "771d5f21de48a3e9969adef7708ddb9a2834ba8729c5f702e5c0bb6067ebaa57",
+    "source": "esxDOS 0.8.9, ESXIDE.BIN",
+    "url": "https://www.esxdos.org/files/esxdos089.zip"
+  },
+  "roms/esxmmc.bin": {
+    "bytes": 8192,
+    "sha256": "89706de560d66432fe19ddb895e7cde49e252e932687dcb57fb92259a0259339",
+    "source": "esxDOS 0.8.9, ESXMMC.BIN",
+    "url": "https://www.esxdos.org/files/esxdos089.zip"
+  },
+  "roms/hc-family-cpm.rom": {
+    "bytes": 16384,
+    "sha256": "9f71f5d5116efc8a824fac18378c61ab43e371d54c6a6db1c1374e92e5ea8bf4",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc-family-cpm.rom",
+    "derived": "built by the hc core's own tools, from the archives of its docs/hc/sources.lock.json"
+  },
+  "roms/hc128.rom": {
+    "bytes": 32768,
+    "sha256": "15193b404dfe4c6b242c8406e96a8494d0dd837323e043c93b696a28f4579b0f",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc128.rom",
+    "url": "https://www.z80-romania.ro/files/56/HC 91 Plus - HC 128 (19xx)(ICEFelix).rom.zip?1683610071"
+  },
+  "roms/hc2000-0.rom": {
+    "bytes": 16384,
+    "sha256": "fcb2da8daa8e1698b898a13b8baf9556d7fe2c7f2039bd1b7a6033185e0798b8",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc2000-0.rom",
+    "url": "https://raw.githubusercontent.com/svpantazi/fuse-ro/f57d2415f89bd832e6df49a465319929b05f3508/ro5/fuse-1.6.0-ro-5.zip"
+  },
+  "roms/hc2000-1.rom": {
+    "bytes": 16384,
+    "sha256": "4e5a52e98cbe5f9d42bcb2dcdd38cc6095f42dc0fb437be218dacac3da3830fa",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc2000-1.rom",
+    "url": "https://raw.githubusercontent.com/svpantazi/fuse-ro/f57d2415f89bd832e6df49a465319929b05f3508/ro5/fuse-1.6.0-ro-5.zip"
+  },
+  "roms/hc85.rom": {
+    "bytes": 16384,
+    "sha256": "e3b92f2362b67c8ea5697f1eea89eab6319c5bcb255be3bdaa314f10b602d1dc",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc85.rom",
+    "url": "https://www.z80-romania.ro/files/54/HC%2085%20%2819xx%29%28ICEFelix%29.rom.zip"
+  },
+  "roms/hc88.rom": {
+    "bytes": 2048,
+    "sha256": "73fc1804f9a7c110533141d23e940f1af3a390155d0ccbbdcc254a21358431c4",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc88.rom",
+    "url": "https://www.z80-romania.ro/files/72/HC 88 (19xx)(ICEFelix).rom.zip?1683609602="
+  },
+  "roms/hc90.rom": {
+    "bytes": 16384,
+    "sha256": "b23d93245be833ce9b2e00c7e9f37fad5ae075c1642a01222f5f86fb915a60cf",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc90.rom",
+    "url": "https://www.z80-romania.ro/files/2/HC 90 (19xx)(ICEFelix).rom.zip?1683608922"
+  },
+  "roms/hc91.rom": {
+    "bytes": 16384,
+    "sha256": "0902690c7b69871a2791165fb06f699bc676985d867dbaa0d76c1ef89d40a9ca",
+    "source": "MiSTerRO/src/core-hc/assets/roms/hc91.rom",
+    "url": "https://www.z80-romania.ro/files/7/HC 91 (19xx)(ICEFelix).rom.zip?1683608892"
+  },
+  "roms/if85.rom": {
+    "bytes": 10240,
+    "sha256": "05256118e74a3ae63a7d15368a3b353e95f3268981ccba27e03325d6aac4b538",
+    "source": "MiSTerRO/src/core-hc/assets/roms/if85.rom",
+    "derived": "built by the hc core's own tools, from the archives of its docs/hc/sources.lock.json"
+  },
+  "roms/if90.rom": {
+    "bytes": 16384,
+    "sha256": "d93d799036971fa5960dd6ef3787ba4aa3e97941ab5e5714783df1ec3c8f2475",
+    "source": "MiSTerRO/src/core-hc/assets/roms/if90.rom",
+    "url": "https://raw.githubusercontent.com/svpantazi/fuse-ro/f57d2415f89bd832e6df49a465319929b05f3508/ro5/fuse-1.6.0-ro-5.zip"
+  },
+  "roms/jet.rom": {
+    "bytes": 16384,
+    "sha256": "f3c220e4ebbce7a2e21890ce1735bc073e90a08c51019cf5c5b7132de5cc9232",
+    "source": "MiSTerRO/src/core-jet/assets/roms/boot.rom",
+    "derived": "built by the JET core's tools from the archive https://www.z80-romania.ro/JET-256 (docs/jet/provenance.md)"
+  },
+  "roms/plus-loader.rom": {
+    "bytes": 2048,
+    "sha256": "877a669698b880e6367ae9968c0ac0c5a0e93edf917b424cc6490bb9e2e01b86",
+    "source": "MiSTerRO/src/core-tims/assets/roms/plus-loader.rom",
+    "derived": "built by the TIM-S core's tools from the archives https://www.z80-romania.ro/TIM_S-68 and https://www.z80-romania.ro/TIM_S_Plus-97 (docs/tims/provenance.md)"
+  },
+  "roms/plus3-system.rom": {
+    "bytes": 65536,
+    "sha256": "5e7d9b3355ca76f4a99cbcc0bc1c90118ecda6a1549c2cb0f02e98af17694f3e",
+    "source": "MiSTerRO/src/core-tims/assets/roms/plus3-system.rom",
+    "derived": "built by the TIM-S core's tools from the archives https://www.z80-romania.ro/TIM_S-68 and https://www.z80-romania.ro/TIM_S_Plus-97 (docs/tims/provenance.md)"
+  },
+  "roms/prae-3.5.rom": {
+    "bytes": 16384,
+    "sha256": "46fdb6719b9965492e2abcb00adf7f0d8d8f0d7896b026e4e5e70781e768eed1",
+    "source": "MiSTerRO/src/core-prae/assets/roms/prae-3.5-inverted.rom",
+    "derived": "built by the PRAE core's tools from the archive https://www.z80-romania.ro/PRAE-4 (docs/prae/provenance.md)"
+  },
+  "roms/prae-3.6.rom": {
+    "bytes": 16384,
+    "sha256": "dc8c646c4eaf515bcb75bcca950df3e9242ffeb0058ead48d134e6d753c33b09",
+    "source": "MiSTerRO/src/core-prae/assets/roms/prae-3.6-inverted.rom",
+    "derived": "built by the PRAE core's tools from the archive https://www.z80-romania.ro/PRAE-4 (docs/prae/provenance.md)"
+  },
+  "roms/tims-standard.rom": {
+    "bytes": 16384,
+    "sha256": "89df0794d0b6b59c3a8d789b6906cbc960f0e2cb8c207bea7ac300b92fc1df56",
+    "source": "MiSTerRO/src/core-tims/assets/roms/tims-standard.rom",
+    "derived": "built by the TIM-S core's tools from the archives https://www.z80-romania.ro/TIM_S-68 and https://www.z80-romania.ro/TIM_S_Plus-97 (docs/tims/provenance.md)"
+  }
+}
