@@ -329,7 +329,7 @@ and `ui.autoload`: they are still read, and moved here when the setup screen nex
 
 | Key | Values | Default | Meaning |
 |---|---|---|---|
-| `video.look` | `plain`, `crt` | `crt` | The picture as it is, or through the M-CRT shader, which imitates a cathode-ray tube monitor (without OpenGL the picture is plain whatever this says) |
+| `video.look` | `plain`, `crt` | `crt` | The picture as it is, or through the CRT emulation shader, which imitates a cathode-ray tube monitor (without OpenGL the picture is plain whatever this says) |
 | `video.aspect` | `original`, `square` | `original` | The picture's shape: 4:3 as on the monitor, or square pixels |
 | `video.scale` | `fit`, `integer` | `fit` | Fit the window, or whole multiples of the picture only |
 | `video.border` | `full`, `medium`, `minimal`, `none` | `full` | How much of the border around the machine's screen is shown: all the frame the monitor showed, 16 lines of it (`medium`), 5 lines (`minimal`) or none; at the sides as wide as that. The setup screen follows it |

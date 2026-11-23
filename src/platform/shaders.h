@@ -8,8 +8,8 @@
  * here may disturb what is. The core still produces the same picture; these
  * shaders only decide how it is put on the screen.
  *
- * `ZR_CRT_FRAGMENT` is a transcription of the libretro `m-crt` shader (the
- * M-CRT project), taken unchanged apart from the uniform names. Its chain is
+ * `ZR_CRT_FRAGMENT` is the CRT emulation shader, written for libretro and
+ * taken unchanged apart from the uniform names. Its chain is
  * overscan, curvature, a 3x3 gaussian, the optional monochrome quantisation,
  * rounded corners, vignette, scanlines and the aperture stripe, then gamma,
  * contrast, saturation and brightness. The parameter defaults below are the
