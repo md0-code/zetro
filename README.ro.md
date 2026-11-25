@@ -155,4 +155,4 @@ Comanda `tools/build.ps1 -Libretro` compilează nucleul Libretro pe Windows. Arh
 
 ## Licență
 
-GPL-3.0-or-later (`docs/LICENSE`). Componentele terțe sunt listate în `docs/THIRD_PARTY.md`.
+GPL-3.0-or-later (`LICENSE`). Componentele terțe sunt listate în `docs/THIRD_PARTY.md`.

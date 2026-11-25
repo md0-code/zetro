@@ -151,4 +151,4 @@ Build the Libretro core with `tools/build.ps1 -Libretro` on Windows. To make the
 
 ## License
 
-GPL-3.0-or-later (`docs/LICENSE`). Third-party components are listed in `docs/THIRD_PARTY.md`.
+GPL-3.0-or-later (`LICENSE`). Third-party components are listed in `docs/THIRD_PARTY.md`.
