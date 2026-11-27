@@ -617,6 +617,7 @@ int zr_host_write_file(const char *path, const uint8_t *data, size_t size, char 
 /* --- files read and written in place ---------------------------------------- */
 
 struct zr_host_file {
+    unsigned references;
     HANDLE h;
     uint64_t length;
 };
@@ -633,6 +634,7 @@ zr_host_file *zr_host_file_open(const char *path, int *writable, char *error, si
     zr_host_file *f = malloc(sizeof *f);
     if (!f) { if (error && capacity) snprintf(error, capacity, "Out of memory"); CloseHandle(h); return NULL; }
     f->h = h;
+    f->references = 1;
     f->length = (uint64_t)length.QuadPart;
     if (writable) *writable = can_write;
     return f;
@@ -681,8 +683,13 @@ int zr_host_file_write_at(zr_host_file *f, uint64_t offset, const void *data, si
 }
 int zr_host_file_flush(zr_host_file *f) { return FlushFileBuffers(f->h) != 0; }
 uint64_t zr_host_file_length(const zr_host_file *f) { return f->length; }
+zr_host_file *zr_host_file_retain(zr_host_file *f) {
+    ++f->references;
+    return f;
+}
+
 void zr_host_file_close(zr_host_file *f) {
-    if (!f) return;
+    if (!f || --f->references) return;
     CloseHandle(f->h);
     free(f);
 }

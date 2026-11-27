@@ -721,13 +721,16 @@ static int interface_create(zr_spectrum *s, const zr_machine_setup *setup, char 
 static int card_insert(zr_spectrum *s, unsigned index, zr_media *media, char *error, size_t capacity) {
     if (s->iface_media[index]) return fail(error, capacity, "%s", "The slot is not empty");
     /* The image is used in place: the media only names it (the shell reads nothing of a card). */
-    zr_card *card = zr_card_open(media->path, !media->writable, error, capacity);
+    zr_card *card = media->card ? zr_card_clone(media->card, !media->writable, error, capacity) :
+                                  zr_card_open(media->path, !media->writable, error, capacity);
     if (!card) return 0;
     if (s->divide) zr_divide_attach(s->divide, index - 1u, card);
     else if (s->divmmc && index == 1u && !zr_divmmc_attach(s->divmmc, card, error, capacity)) {
         zr_card_close(card);
         return 0;
     }
+    media->card = card;
+    media->writable = card->writable;
     s->card[index] = card;
     s->iface_media[index] = media;
     return 1;

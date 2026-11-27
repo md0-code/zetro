@@ -22,6 +22,8 @@ typedef struct zr_media {
     int writable;                       /* the file can be written and is not write-protected */
     int dirty;                          /* the content differs from the file */
     int in_place;                       /* a card image: only the path is held, the machine opens the file itself and uses it in place */
+    struct zr_disk *disk;               /* decoded floppy, borrowed while mounted */
+    struct zr_card *card;               /* attached card, borrowed while mounted */
     char error[128];                    /* why the last save failed */
 } zr_media;
 

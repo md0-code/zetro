@@ -1674,12 +1674,12 @@ static void activate(zr_setup *s, int id) {
             zr_text_format(title, sizeof title, ZR_T_PICK_TITLE, zr_t(f->media[slot].label));
             open_picker(s, TAG_PICK_FILE, slot, title, folder, filter);
         } else if (part == PART_EJECT) {
-            if (s->env.eject) s->env.eject(s->env.ctx, (unsigned)slot);
+            if (zr_machine_media(s->env.machine, (unsigned)slot) && s->env.eject && !s->env.eject(s->env.ctx, (unsigned)slot)) return;
             c->image[0] = 0;
             s->dirty = 1;
         } else if (part == PART_PROTECT) {
+            if (s->env.protect && !s->env.protect(s->env.ctx, (unsigned)slot, !c->write_protect)) return;
             c->write_protect = !c->write_protect;
-            if (s->env.protect && zr_machine_media(s->env.machine, (unsigned)slot)) s->env.protect(s->env.ctx, (unsigned)slot, c->write_protect);
             s->dirty = 1;
         } else if (part == PART_FAST) {
             c->fast = !c->fast;

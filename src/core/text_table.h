@@ -240,11 +240,11 @@ X(ABOUT_NEW, "New in this version", "Nou în această versiune")
 /* What the current version brought, the changes parted by '|', each short enough for a line of the page: written anew with every version (tests/test_core.c holds it to
  * src/VERSION through ZR_CHANGES_VERSION). */
 #ifndef ZR_CHANGES_VERSION
-#define ZR_CHANGES_VERSION "0.13.5"
+#define ZR_CHANGES_VERSION "0.13.6"
 #endif
 X(ABOUT_CHANGES,
-  "Separate Libretro downloads",
-  "Arhive Libretro separate")
+  "Safer disk and state loading",
+  "Încărcare sigură de discuri și stări")
 
 X(L_FILE, "File", "Fișier")
 X(L_EJECT, "Eject", "Scoate")

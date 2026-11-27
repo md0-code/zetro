@@ -238,6 +238,7 @@ static int hc_insert(void *self, unsigned slot, zr_media *media, char *error, si
         return 0;
     }
     h->disk[drive] = disk;
+    media->disk = disk;
     h->disk_media[drive] = media;
     return 1;
 }

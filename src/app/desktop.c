@@ -516,29 +516,18 @@ static int snapshot_save_said(void *ctx, const char *path, char *error, size_t c
 
 static int media_eject(shell *s, unsigned slot) {
     if (slot >= ZR_CONFIG_MEDIA || !s->media[slot]) return 0;
-    zr_machine_eject(s->m, slot);
-    if (!zr_media_save(s->media[slot])) fprintf(stderr, "Cannot save %s: %s\n", s->media[slot]->path, s->media[slot]->error);
-    zr_media_close(s->media[slot]);
-    s->media[slot] = NULL;
+    char error[512];
+    if (!zr_states_replace_media(s->m, slot, &s->media[slot], NULL, 0, error, sizeof error)) {
+        fprintf(stderr, "%s\n", error);
+        return 0;
+    }
     return 1;
 }
 
 static int media_insert(shell *s, unsigned slot, const char *path, int write_protect, char *error, size_t capacity) {
     const zr_family *f = zr_machine_family(s->m);
-    if (slot >= f->media_count || slot >= ZR_CONFIG_MEDIA) { snprintf(error, capacity, "There is no such slot"); return 0; }
-    if (!zr_media_extension_in(path, f->media[slot].extensions)) {
-        snprintf(error, capacity, "The slot %s takes %s files", f->media[slot].key, f->media[slot].extensions);
-        return 0;
-    }
-    /* A card image is large: it is used in place by the machine, so the media only names it (and the slot is emptied first, as
-     * the file is not opened twice). */
-    const int card = f->media[slot].kind == ZR_MEDIA_CARD;
-    if (card) media_eject(s, slot);
-    zr_media *media = card ? zr_media_open_in_place(path, write_protect, error, capacity) : zr_media_open(path, write_protect, error, capacity);
-    if (!media) return 0;
-    if (!card) media_eject(s, slot);
-    if (!zr_machine_insert(s->m, slot, media, error, capacity)) { zr_media_close(media); return 0; }
-    s->media[slot] = media;
+    if (slot >= ZR_CONFIG_MEDIA) { snprintf(error, capacity, "No such slot"); return 0; }
+    if (!zr_states_replace_media(s->m, slot, &s->media[slot], path, write_protect, error, capacity)) return 0;
     if (f->media[slot].kind == ZR_MEDIA_TAPE) cheats_for_tape(s, path);
     return 1;
 }
@@ -644,46 +633,14 @@ static int state_save(shell *s, const char *path, char *error, size_t capacity) 
  * position is in its tape); what the guest wrote since stays in the files. `warning` (cells) says when a file is missing or its
  * content is no longer what the state was saved with ("" when all is as it was). */
 static int state_load(shell *s, const char *path, char *warning, size_t warning_capacity, char *error, size_t capacity) {
-    uint8_t *data = NULL;
-    size_t size = 0;
-    static zr_states_info info;
-    zr_state_reader r;
-    if (warning_capacity) warning[0] = 0;
-    if (!zr_states_load_file(path, &data, &size, error, capacity)) return 0;
-    int ok = zr_states_read(data, size, &info, &r, error, capacity);
-    if (ok && strcmp(r.model, zr_machine_family(s->m)->models[zr_machine_model(s->m)].id)) {
-        snprintf(error, capacity, "The state is of another machine (%s)", r.model);
-        ok = 0;
-    }
-    for (unsigned i = 0; ok && i < ZR_CONFIG_MEDIA; ++i) {
-        const zr_states_media *md = &info.media[i];
-        char problem[256], name[ZR_MEDIA_PATH];
-        if (!md->present) { media_eject(s, i); continue; }
-        if (!s->media[i] || strcmp(s->media[i]->path, md->path)) {
-            media_eject(s, i);
-            if (!media_insert(s, i, md->path, md->write_protect, problem, sizeof problem)) {
-                fprintf(stderr, "Warning: %s: %s\n", md->path, problem);
-                file_name(md->path, name, sizeof name);
-                zr_text_format(warning, warning_capacity, ZR_T_SAY_STATE_MISSING, name);
-                continue;
-            }
-        }
-        uint8_t now[32];
-        if (s->media[i]->in_place) continue;
-        zr_sha256(s->media[i]->data, s->media[i]->size, now);
-        if (md->hashed && memcmp(now, md->sha256, sizeof now)) {
-            fprintf(stderr, "Warning: %s has changed since the state was saved\n", md->path);
-            file_name(md->path, name, sizeof name);
-            zr_text_format(warning, warning_capacity, ZR_T_SAY_STATE_CHANGED, name);
-        }
-    }
-    ok = ok && zr_machine_load(s->m, &r, error, capacity);
-    free(data);
+    if (!zr_states_load_session(s->m, s->config, s->options->roms, s->media, path, warning, warning_capacity, error, capacity)) return 0;
+    tape_settings(s);
+    ports_apply(s);
     ports_resend(s);
     release_all(s);
     s->resync = 1;
     zr_rewind_clear(&s->ring);                                  /* the ring's states are of another time line now */
-    return ok;
+    return 1;
 }
 
 /* The quick-save slots (F2 and F3, the States page): files beside the configuration, for the running model. */
@@ -930,18 +887,12 @@ static int setup_eject(void *ctx, unsigned slot) {
 
 /* A slot's write protection switched while a file is in it: on, the file is read-only at once; off, it is as the file
  * itself allows. */
-static void setup_protect(void *ctx, unsigned slot, int on) {
+static int setup_protect(void *ctx, unsigned slot, int on) {
     shell *s = ctx;
-    zr_media *m = slot < ZR_CONFIG_MEDIA ? s->media[slot] : NULL;
-    if (!m) return;
-    if (m->in_place) {                              /* a card: the machine holds the file open, the tab moves there */
-        m->writable = zr_machine_control(s->m, slot, ZR_MEDIA_PROTECT, on ? 1u : 0u);
-        return;
-    }
-    if (on) { m->writable = 0; return; }
-    char error[256];
-    zr_media *probe = zr_media_open(m->path, 0, error, sizeof error);
-    if (probe) { m->writable = probe->writable; zr_media_close(probe); }
+    char error[512];
+    if (zr_states_protect_media(s->m, slot, on, error, sizeof error)) return 1;
+    fprintf(stderr, "%s\n", error);
+    return 0;
 }
 
 /* The name of game controller `index` (its number less one), NULL when none is plugged in. */
@@ -1006,7 +957,8 @@ static int rebuild_machine(shell *s) {
     static zr_rom_index none;
     const zr_rom_index *roms = s->options->roms ? s->options->roms : &none;
     zr_machine *m = zr_machine_create(s->config, roms, error, sizeof error);
-    if (!m) {
+    if (!m || !zr_states_flush_all(s->m, error, sizeof error)) {
+        if (m) zr_machine_destroy(m);
         zr_tui_clean(error, shown, sizeof shown);
         say_id(s, ZR_T_SAY_REBUILD_FAILED, shown);
         return 0;
@@ -1809,13 +1761,10 @@ int zr_desktop_run(zr_machine **machine, zr_config *config, const zr_desktop_opt
     zr_host_ports_close(&s->ports, s->m);                       /* what the guest sent last is written out */
     /* The media go back to their files. */
     for (unsigned i = 0; i < ZR_CONFIG_MEDIA; ++i)
-        if (s->media[i]) {
-            zr_machine_eject(s->m, i);
-            if (!zr_media_save(s->media[i]) && !status) {
-                snprintf(s->error, sizeof s->error, "Cannot save %s: %s", s->media[i]->path, s->media[i]->error);
-                status = 1;
-            }
-            zr_media_close(s->media[i]);
+        if (!zr_states_close_media(s->m, i, &s->media[i], s->config->source, error, capacity)) {
+            fprintf(stderr, "%s\n", error);
+            if (!status) snprintf(s->error, sizeof s->error, "%s", error);
+            status = 1;
         }
     if (status) snprintf(error, capacity, "%s", s->error);
     if (s->tcp) zr_host_stream_close(s->tcp);

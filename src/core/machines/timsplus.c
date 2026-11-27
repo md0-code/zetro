@@ -726,6 +726,7 @@ static int plus_insert(void *self, unsigned slot, zr_media *media, char *error, 
         return 0;
     }
     t->disk[drive] = disk;
+    media->disk = disk;
     t->disk_media[drive] = media;
     ready_update(t);
     return 1;

@@ -186,6 +186,8 @@ typedef enum zr_run_status {
  * index (copied: the index may go afterwards). NULL with the reason. Media
  * are inserted afterwards with zr_machine_insert. */
 zr_machine *zr_machine_create(const zr_config *config, const zr_rom_index *roms, char *error, size_t capacity);
+/* Exchange running machines, keeping the handles held by the shell and setup valid. */
+void zr_machine_swap(zr_machine *a, zr_machine *b);
 void zr_machine_destroy(zr_machine *m);
 /* The family and the model that run (the test machine's when ROMs are missing). */
 const zr_family *zr_machine_family(const zr_machine *m);

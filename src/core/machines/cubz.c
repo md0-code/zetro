@@ -811,6 +811,7 @@ static int cubz_insert(void *self, unsigned slot, zr_media *media, char *error, 
     }
     s->media[slot] = media;
     s->disk[slot] = disk;
+    media->disk = disk;
     zr_upd765_drive_changed(&s->fdc);
     return 1;
 }

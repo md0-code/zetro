@@ -813,6 +813,7 @@ static int cobra_insert(void *self, unsigned slot, zr_media *media, char *error,
         return 0;
     }
     c->disk[u] = disk;
+    media->disk = disk;
     c->disk_media[u] = media;
     zr_upd765_drive_changed(&c->fdc);
     return 1;

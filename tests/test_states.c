@@ -78,6 +78,16 @@ int main(void) {
     zr_machine *m = build("machine:\n  model: test\n", NULL);
     CHECK(m != NULL);
     if (!m) return 1;
+    /* A failed write must leave the sole copy of the edited image in its drive. */
+    zr_media *owned = zr_media_from("", (const uint8_t *)"X", 1);
+    CHECK(owned && zr_machine_insert(m, 0, owned, error, sizeof error));
+    if (!owned) return 1;
+    owned->dirty = owned->writable = 1;
+    CHECK(!zr_states_replace_media(m, 0, &owned, NULL, 0, error, sizeof error));
+    CHECK(owned && zr_machine_media(m, 0) == owned && owned->dirty && owned->data[0] == 'X');
+    CHECK(!zr_states_protect_media(m, 0, 1, error, sizeof error) && owned->writable);
+    owned->dirty = 0;
+    CHECK(zr_states_replace_media(m, 0, &owned, NULL, 0, error, sizeof error));
     const uint64_t period = zr_machine_frame_period(m);
     zr_machine_run(m, period * 3);
 

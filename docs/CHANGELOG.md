@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.6 (2026-11-27)
+
+- Unsaved disk and tape changes are retained when a media operation fails. Write protection now reaches the emulated floppy drive.
+- A rejected save state leaves the current machine and media mounted.
+
 ## 0.13.5 (2026-11-23)
 - Separate downloads for the desktop emulator and Libretro core on Windows and Linux.
 

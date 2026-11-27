@@ -144,6 +144,7 @@ int zr_host_file_write_at(zr_host_file *f, uint64_t offset, const void *data, si
 /* What was written reaches the disk; 0 when it cannot. */
 int zr_host_file_flush(zr_host_file *f);
 uint64_t zr_host_file_length(const zr_host_file *f);
+zr_host_file *zr_host_file_retain(zr_host_file *f);
 void zr_host_file_close(zr_host_file *f);
 
 #endif /* ZR_HOST_H */

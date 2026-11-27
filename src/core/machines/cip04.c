@@ -480,6 +480,7 @@ static int cip_insert(void *self, unsigned slot, zr_media *media, char *error, s
         return 0;
     }
     h->disk = disk;
+    media->disk = disk;
     h->disk_media = media;
     zr_upd765_drive_changed(&h->fdc);
     return 1;

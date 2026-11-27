@@ -268,7 +268,19 @@ int zr_machine_insert(zr_machine *m, unsigned slot, zr_media *media, char *error
     return m->impl->insert(m->self, slot, media, error, capacity);
 }
 zr_media *zr_machine_media(const zr_machine *m, unsigned slot) { return slot < m->family->media_count ? m->impl->media(m->self, slot) : NULL; }
-int zr_machine_eject(zr_machine *m, unsigned slot) { return slot < m->family->media_count && m->impl->eject(m->self, slot); }
+int zr_machine_eject(zr_machine *m, unsigned slot) {
+    zr_media *media = zr_machine_media(m, slot);
+    if (!media || !m->impl->eject(m->self, slot)) return 0;
+    media->card = NULL;
+    media->disk = NULL;
+    return 1;
+}
+
+void zr_machine_swap(zr_machine *a, zr_machine *b) {
+    const zr_machine tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
 unsigned zr_machine_activity(const zr_machine *m) { return m->impl->activity(m->self); }
 int zr_machine_control(zr_machine *m, unsigned slot, unsigned command, uint32_t value) {
     return m->impl->control && slot < m->family->media_count && m->impl->control(m->self, slot, command, value);

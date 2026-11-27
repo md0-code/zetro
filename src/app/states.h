@@ -77,6 +77,16 @@ void zr_states_slot_path(const char *config_source, const char *model, unsigned 
 /* A state file written whole, its folders made first. 0 with the reason. */
 int zr_states_save_file(const char *path, const uint8_t *data, size_t size, char *error, size_t capacity);
 /* A state file read whole (the caller frees *data). 0 with the reason. */
+/* Shell operations on mounted media preserve changes before replacing a slot or changing its tab. */
+int zr_states_flush_media(zr_machine *m, unsigned slot, char *error, size_t capacity);
+int zr_states_close_media(zr_machine *m, unsigned slot, zr_media **owned, const char *base, char *error, size_t capacity);
+int zr_states_flush_all(zr_machine *m, char *error, size_t capacity);
+int zr_states_protect_media(zr_machine *m, unsigned slot, int protect, char *error, size_t capacity);
+int zr_states_replace_media(zr_machine *m, unsigned slot, zr_media **owned, const char *path, int protect,
+                            char *error, size_t capacity);
+int zr_states_load_session(zr_machine *m, const zr_config *config, const zr_rom_index *roms, zr_media **media, const char *path,
+                           char *warning, size_t warning_capacity, char *error, size_t capacity);
+
 int zr_states_load_file(const char *path, uint8_t **data, size_t *size, char *error, size_t capacity);
 /* What a slot file says (info), 0 when the slot is empty or its file is not a state. */
 int zr_states_slot_info(const char *path, zr_states_info *info);

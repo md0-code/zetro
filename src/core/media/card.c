@@ -201,6 +201,16 @@ zr_card *zr_card_open(const char *path, int write_protect, char *error, size_t c
     return c;
 }
 
+/* Another machine can prepare a restored controller while the running one owns the file. */
+zr_card *zr_card_clone(const zr_card *source, int write_protect, char *error, size_t capacity) {
+    zr_card *card = malloc(sizeof *card);
+    if (!card) { fail(error, capacity, "Out of memory"); return NULL; }
+    *card = *source;
+    card->file = zr_host_file_retain(source->file);
+    card->writable = card->file_writable && !write_protect;
+    return card;
+}
+
 void zr_card_close(zr_card *c) {
     if (!c) return;
     if (c->file) {

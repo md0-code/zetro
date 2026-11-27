@@ -954,6 +954,7 @@ static int hc88_insert(void *self, unsigned slot, zr_media *media, char *error, 
     }
     s->media[slot] = media;
     s->disk[slot] = disk;
+    media->disk = disk;
     sync_drives(s, board_now(s));
     return 1;
 }

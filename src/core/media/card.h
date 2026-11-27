@@ -59,6 +59,7 @@ typedef struct zr_card {
 } zr_card;
 
 /* Opens an image; `write_protect` makes it read-only whatever the file allows. NULL with the reason. */
+zr_card *zr_card_clone(const zr_card *source, int write_protect, char *error, size_t capacity);
 zr_card *zr_card_open(const char *path, int write_protect, char *error, size_t capacity);
 /* Makes a blank image of `bytes` (a multiple of 512, ZR_CARD_MIN_BYTES to ZR_CARD_MAX_BYTES; 16 MiB to 4 GiB are the
  * sizes of the setup screen), raw or HDF (a version 1.0 header with the IDENTIFY data of a drive of that size; the

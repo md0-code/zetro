@@ -1,5 +1,10 @@
 /* State files, slots and the rewind ring (states.h). ZetRo's own code. */
 #include "states.h"
+#include "../core/media/card.h"
+#include "../core/media/disk.h"
+#include "../core/media/tape.h"
+#include "../core/text.h"
+#include "../core/romdb.h"
 #include "../host/host.h"
 
 #include <stdio.h>
@@ -290,5 +295,174 @@ void zr_rewind_cut(zr_rewind *r, size_t index, uint64_t interval) {
 int zr_rewind_find(const zr_rewind *r, uint64_t time, size_t *index) {
     for (size_t i = r->count; i-- > 0;)
         if (entry(r, i)->time <= time) { *index = i; return 1; }
+    return 0;
+}
+
+/* Synchronise the controller's decoded image before writing the backing file. */
+int zr_states_flush_media(zr_machine *m, unsigned slot, char *error, size_t capacity) {
+    zr_media *image = zr_machine_media(m, slot);
+    if (!image) return 1;
+    zr_tape_deck *deck = zr_machine_tape_deck(m, slot);
+    if (deck && deck->tape) {
+        if (zr_tape_deck_recording(deck)) zr_machine_control(m, slot, ZR_MEDIA_STOP, 0);
+        if (zr_tape_modified(deck->tape) && !zr_tape_save_media(deck->tape, image, NULL, error, capacity)) return 0;
+    }
+    if (image->disk && image->disk->dirty && !zr_disk_save_media(image->disk, image, error, capacity)) return 0;
+    if (image->card && !zr_card_flush(image->card)) { snprintf(error, capacity, "Cannot flush %s", image->path); return 0; }
+    if (zr_media_save(image)) return 1;
+    snprintf(error, capacity, "%s: %s", image->path, image->error);
+    return 0;
+}
+
+int zr_states_flush_all(zr_machine *m, char *error, size_t capacity) {
+    for (unsigned slot = 0; slot < zr_machine_family(m)->media_count; ++slot)
+        if (!zr_states_flush_media(m, slot, error, capacity)) return 0;
+    return 1;
+}
+
+int zr_states_protect_media(zr_machine *m, unsigned slot, int protect, char *error, size_t capacity) {
+    zr_media *image = zr_machine_media(m, slot);
+    if (!image) return 1;
+    if (!zr_states_flush_media(m, slot, error, capacity)) return 0;
+    if (image->card) {
+        if (!zr_card_set_protect(image->card, protect)) { snprintf(error, capacity, "The card file is read-only"); return 0; }
+    } else if (!protect) {
+        int writable = 0;
+        zr_host_file *file = zr_host_file_open(image->path, &writable, error, capacity);
+        if (!file) return 0;
+        zr_host_file_close(file);
+        if (!writable) { snprintf(error, capacity, "The file is read-only"); return 0; }
+    }
+    image->writable = !protect;
+    if (image->disk) {
+        image->disk->readonly = 0;
+        zr_disk_set_protect(image->disk, protect);
+    }
+    return 1;
+}
+
+static zr_media *open_image(zr_machine *m, unsigned slot, const char *path, int protect, zr_media *previous,
+                            char *error, size_t capacity) {
+    const zr_family *f = zr_machine_family(m);
+    if (slot >= f->media_count || !zr_machine_has_media(m, slot) || !zr_media_extension_in(path, f->media[slot].extensions)) {
+        snprintf(error, capacity, "This slot does not take this file");
+        return NULL;
+    }
+    if (f->media[slot].kind != ZR_MEDIA_CARD) return zr_media_open(path, protect, error, capacity);
+    if (previous && previous->card && !strcmp(previous->path, path)) {
+        zr_media *image = calloc(1, sizeof *image);
+        if (!image) { snprintf(error, capacity, "Out of memory"); return NULL; }
+        snprintf(image->path, sizeof image->path, "%s", previous->path);
+        image->in_place = 1;
+        image->writable = !protect && previous->card->file_writable;
+        image->card = previous->card;  /* card_insert clones the handle */
+        return image;
+    }
+    return zr_media_open_in_place(path, protect, error, capacity);
+}
+
+int zr_states_replace_media(zr_machine *m, unsigned slot, zr_media **owned, const char *path, int protect,
+                            char *error, size_t capacity) {
+    if (!zr_states_flush_media(m, slot, error, capacity)) return 0;
+    zr_media *old = *owned;
+    zr_media *next = path ? open_image(m, slot, path, protect, old, error, capacity) : NULL;
+    if (path && !next) return 0;
+    zr_card *shared = next && next->card ? zr_card_clone(next->card, protect, error, capacity) : NULL;
+    if (next && next->card && !shared) { zr_media_close(next); return 0; }
+    if (next) next->card = shared;
+    if (old && zr_machine_media(m, slot) && !zr_machine_eject(m, slot)) {
+        snprintf(error, capacity, "Cannot eject %s", old->path);
+        zr_media_close(next);
+        zr_card_close(shared);
+        return 0;
+    }
+    if (next && !zr_machine_insert(m, slot, next, error, capacity)) {
+        char why[256];
+        if (old && !zr_machine_insert(m, slot, old, why, sizeof why))
+            snprintf(error, capacity, "Could not restore %s: %s", old->path, why);
+        zr_media_close(next);
+        zr_card_close(shared);
+        return 0;
+    }
+    zr_card_close(shared);
+    zr_media_close(old);
+    *owned = next;
+    return 1;
+}
+
+/* A state can fail deep inside a device's loader. Only swap in the staged machine once every device has accepted it. */
+int zr_states_load_session(zr_machine *m, const zr_config *config, const zr_rom_index *roms, zr_media **media, const char *path,
+                           char *warning, size_t warning_capacity, char *error, size_t capacity) {
+    static zr_states_info info;
+    uint8_t *data = NULL;
+    size_t size = 0;
+    zr_state_reader r;
+    if (warning_capacity) warning[0] = 0;
+    if (!zr_states_load_file(path, &data, &size, error, capacity)) return 0;
+    int ok = zr_states_read(data, size, &info, &r, error, capacity);
+    if (ok && strcmp(r.model, zr_machine_family(m)->models[zr_machine_model(m)].id)) {
+        snprintf(error, capacity, "The state is of another machine (%s)", r.model);
+        ok = 0;
+    }
+    zr_machine *next = ok ? zr_machine_create(config, roms, error, capacity) : NULL;
+    zr_media *staged[ZR_CONFIG_MEDIA] = {0};
+    ok = next && zr_states_flush_all(m, error, capacity);
+    for (unsigned i = 0; ok && i < ZR_CONFIG_MEDIA; ++i) {
+        const zr_states_media *md = &info.media[i];
+        if (!md->present) continue;
+        const char *name = md->path;
+        for (const char *p = name; *p; ++p) if (*p == '/' || *p == '\\') name = p + 1;
+        char why[256];
+        staged[i] = open_image(next, i, md->path, md->write_protect, media[i], why, sizeof why);
+        if (!staged[i] || !zr_machine_insert(next, i, staged[i], why, sizeof why)) {
+            zr_media_close(staged[i]);
+            staged[i] = NULL;
+            zr_text_format(warning, warning_capacity, ZR_T_SAY_STATE_MISSING, name);
+            continue;
+        }
+        uint8_t hash[32];
+        if (!staged[i]->in_place && md->hashed) {
+            zr_sha256(staged[i]->data, staged[i]->size, hash);
+            if (memcmp(hash, md->sha256, sizeof hash)) zr_text_format(warning, warning_capacity, ZR_T_SAY_STATE_CHANGED, name);
+        }
+    }
+    ok = ok && zr_machine_load(next, &r, error, capacity);
+    if (ok) {
+        zr_machine_swap(m, next);
+        for (unsigned i = 0; i < ZR_CONFIG_MEDIA; ++i) {
+            zr_media *old = media[i];
+            media[i] = staged[i];
+            staged[i] = old;
+        }
+    }
+    if (next) zr_machine_destroy(next);
+    for (unsigned i = 0; i < ZR_CONFIG_MEDIA; ++i) zr_media_close(staged[i]);
+    free(data);
+    return ok;
+}
+
+int zr_states_close_media(zr_machine *m, unsigned slot, zr_media **owned, const char *base, char *error, size_t cap) {
+    zr_media *image = *owned;
+    if (!image) return 1;
+    if (zr_states_replace_media(m, slot, owned, NULL, 0, error, cap)) return 1;
+    /* At shutdown the host cannot retain the session. Preserve a dirty image at a new name. */
+    if (image->dirty && !image->in_place) {
+        char path[ZR_MEDIA_PATH], extension[16], why[256];
+        zr_media_extension(image->path, extension, sizeof extension);
+        for (unsigned i = 1; i < 10000; ++i) {
+            int n = snprintf(path, sizeof path, "%s.recovery-%u-%u.%s", base, slot, i, extension);
+            if (n < 0 || (size_t)n >= sizeof path) break;
+            if (zr_host_file_exists(path)) continue;
+            if (zr_host_file_create(path, 0, 0, why, sizeof why)) {
+                if (zr_host_write_file(path, image->data, image->size, why, sizeof why))
+                    snprintf(error, cap, "Saved a recovery copy to %s", path);
+                else zr_host_delete_file(path);
+            }
+            break;
+        }
+    }
+    zr_machine_eject(m, slot);
+    zr_media_close(image);
+    *owned = NULL;
     return 0;
 }

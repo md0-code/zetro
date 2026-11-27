@@ -48,7 +48,7 @@ typedef struct zr_setup_env {
     int (*insert)(void *ctx, unsigned slot, const char *path, int write_protect, char *error, size_t capacity);
     int (*eject)(void *ctx, unsigned slot);
     /* A slot's write protection was switched while a file is in it. */
-    void (*protect)(void *ctx, unsigned slot, int on);
+    int (*protect)(void *ctx, unsigned slot, int on);
     /* The name of the game controller with this number (0 to ZR_CONFIG_PADS - 1: the number minus one), NULL when none is
      * plugged in (NULL: the shell has no controllers). */
     const char *(*pad_name)(void *ctx, unsigned index);
